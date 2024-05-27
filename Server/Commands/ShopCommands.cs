@@ -25,7 +25,7 @@ using Bloody.Core.API.v1;
 
 namespace BloodyShop.Server.Commands
 {
-    [CommandGroup("shop")]
+    [CommandGroup("血族商城")]
     internal class ShopCommands
     {
         public static CurrencyModel currency { get; private set; }
@@ -211,7 +211,7 @@ namespace BloodyShop.Server.Commands
             }
         }
 
-        [Command("buy", usage: "<NumberItem> <Quantity> ", description: "Buy an object from the shop", adminOnly: false)]
+        [Command("購買", usage: "<商品代碼> <數量> ", description: "Buy an object from the shop", adminOnly: false)]
         public static void BuyItem(ChatCommandContext ctx, int indexPosition, int quantity)
         {
 
@@ -221,43 +221,43 @@ namespace BloodyShop.Server.Commands
 
                 if (!ConfigDB.ShopEnabled)
                 {
-                    throw ctx.Error(FontColorChat.Yellow($"{FontColorChat.White($"{ConfigDB.StoreName}")} is closed"));
+                    throw ctx.Error(FontColorChat.Yellow($"{FontColorChat.White($"{ConfigDB.StoreName}")} 商店已關閉"));
                 }
 
                 if (quantity <= 0)
                 {
-                    throw ctx.Error($"The minimum purchase quantity of a product is 1");
+                    throw ctx.Error($"商品最少購買數量為1");
                 }
 
                 if (!ItemsDB.SearchItemByCommand(indexPosition, out PrefabModel itemShopModel))
                 {
-                    throw ctx.Error("This item is not available in the store");
+                    throw ctx.Error("該商品在商店中不可用");
                 }
 
                 currency = ShareDB.getCurrency(itemShopModel.currency);
 
                 if (currency == null)
                 {
-                    throw ctx.Error("Error loading currency type");
+                    throw ctx.Error("載入貨幣類型時出錯");
                 }
 
                 var finalPrice = itemShopModel.PrefabPrice * quantity;
 
                 if (!itemShopModel.CheckStockAvailability(quantity))
                 {
-                    throw ctx.Error("There is not enough stock of this item");
+                    throw ctx.Error("該商品庫存不足");
                 }
 
                 var currencyItemModel = GameData.Items.GetPrefabById(new PrefabGUID(currency.guid));
 
                 if (!InventorySystem.verifyHaveSuficientPrefabsInInventory(ctx.Event.User.CharacterName.ToString(), currencyItemModel.PrefabGUID, finalPrice))
                 {
-                    throw ctx.Error($"You need {FontColorChat.White($"{finalPrice} {currency.name}")} in your inventory for this purchase");
+                    throw ctx.Error($"你需要 {FontColorChat.White($"{finalPrice} {currency.name}")} 才能購買");
                 }
 
                 if (!InventorySystem.getPrefabFromInventory(ctx.Event.User.CharacterName.ToString(), currencyItemModel.PrefabGUID, finalPrice))
                 {
-                    throw ctx.Error($"You need {FontColorChat.White($"{finalPrice} {currency.name}")} in your inventory for this purchase");
+                    throw ctx.Error($"你需要 {FontColorChat.White($"{finalPrice} {currency.name}")} 才能購買");
                 }
 
                 var finalQuantity = itemShopModel.PrefabStack * quantity;
@@ -270,11 +270,11 @@ namespace BloodyShop.Server.Commands
                     if (!InventorySystem.AdditemToInventory(ctx.Event.User.CharacterName.ToString(), new PrefabGUID(itemShopModel.PrefabGUID), finalQuantity))
                     {
                         Plugin.Logger.LogError($"Error buying an item User: {ctx.Event.User.CharacterName.ToString()} Item: {itemShopModel.PrefabName} Quantity: {quantity} TotalPrice: {finalPrice}");
-                        throw ctx.Error($"An error has occurred when delivering the items, please contact an administrator");
+                        throw ctx.Error($"出貨時發生錯誤，請聯絡管理員");
                     }
                 }
 
-                ctx.Reply(FontColorChat.Yellow($"Transaction successful. You have purchased {FontColorChat.White($"{quantity}x {itemShopModel.PrefabName}")} for a total of  {FontColorChat.White($"{finalPrice} {currency.name}")}"));
+                ctx.Reply(FontColorChat.Yellow($"交易成功.您已購買 {FontColorChat.White($"{quantity}x {itemShopModel.PrefabName}")} 價格為  {FontColorChat.White($"{finalPrice} {currency.name}")}"));
 
                 if (!ItemsDB.ModifyStockByCommand(indexPosition, quantity))
                 {
@@ -353,19 +353,19 @@ namespace BloodyShop.Server.Commands
             }
         }
 
-        [Command("list", usage: "", description: "List of products available to buy in the store", adminOnly: false)]
+        [Command("商品", usage: "", description: "List of products available to buy in the store", adminOnly: false)]
         public static void list(ChatCommandContext ctx)
         {
             if (!ConfigDB.ShopEnabled)
             {
-                throw ctx.Error(FontColorChat.Yellow($"{FontColorChat.White($"{ConfigDB.StoreName}")} is closed"));
+                throw ctx.Error(FontColorChat.Yellow($"{FontColorChat.White($"{ConfigDB.StoreName}")} 關閉中"));
             }
 
             var listProduct = ItemsDB.GetProductListMessage();
 
             if (listProduct.Count <= 0)
             {
-                throw ctx.Error("No products available in the store");
+                throw ctx.Error("商店中沒有可用的商品");
             }
 
             foreach (string item in listProduct)
@@ -373,8 +373,8 @@ namespace BloodyShop.Server.Commands
                 ctx.Reply(item);
             }
 
-            ctx.Reply(FontColorChat.Yellow($"To buy an object you must have in your inventory the number of currency indicated by each product."));
-            ctx.Reply(FontColorChat.Yellow($"Use the chat command \"{FontColorChat.White($"shop buy <NumberItem> <Quantity> ")}\""));
+            ctx.Reply(FontColorChat.Yellow($"要購買商品時，必須擁有每種商品指定的貨幣量"));
+            ctx.Reply(FontColorChat.Yellow($"再輸入 \"{FontColorChat.White($".血族商城 購買 <商品代碼> <數量> ")}\""));
 
         }
 
