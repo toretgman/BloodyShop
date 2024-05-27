@@ -419,8 +419,8 @@ namespace BloodyShop.DB
                         }
                         listItems.Add($"{FontColorChat.White("[")}{FontColorChat.Yellow(index.ToString())}{FontColorChat.White("]")} " +
                             $"{FontColorChat.Yellow(prefabName)} " +
-                            $"{FontColorChat.Red("Price:")} {FontColorChat.Yellow(item.PrefabPrice.ToString())} {FontColorChat.White($"{currency.name}")} " +
-                            $"{FontColorChat.Red("Stock:")} {FontColorChat.Yellow(finalStock)} units");
+                            $"{FontColorChat.Red("價錢:")} {FontColorChat.Yellow(item.PrefabPrice.ToString())} {FontColorChat.White($"{currency.name}")} " +
+                            $"{FontColorChat.Red("庫存:")} {FontColorChat.Yellow(finalStock)} 個");
                         index++;
                     }
                 }
